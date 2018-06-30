@@ -3,6 +3,8 @@ import time
 import os
 import platform
 import logging
+import threading
+import json
 
 from numpy import interp
 
@@ -14,6 +16,7 @@ from Phidget22.PhidgetException import *
 import pygame
 from Device_Manager import Device_Manager, Device
 from Joystick import Joystick
+from ws_server import start_ws_server
 
 
 DC_MOTOR_PORT = 0
@@ -63,6 +66,23 @@ def init_gps():
 
     return gps
 
+# a web socket server to push data to client
+def start_ws_server( ws_clients ):
+    class Data_pusher(WebSocket):
+        def handleMessage(self):
+            pass
+
+        def handleConnected(self):
+            print(self.address, 'ws_server: client connected')
+            ws_clients.append(self)
+
+        def handleClose(self):
+            ws_clients.remove(self)
+            print(self.address, 'ws_server: client closed')
+    
+    server = SimpleWebSocketServer('', 8000, Data_pusher)
+    server.serveforever()
+
 def setup():
     dm = Device_Manager()
     js = Joystick()
@@ -96,13 +116,28 @@ def main():
     }
 
     dm, js = setup()
+
+    ws_clients = []
+
+    ws_server_thread = threading.Thread(
+        target=start_ws_server,
+        args=(ws_clients,)
+    )
+    ws_server_thread.daemon = True
+    ws_server_thread.start()
     
     while not state["should_exit"]:
-        state.update(js.get_event())
+        event = js.get_event()
+        state.update(event)
         if state["should_exit"]:
             continue
         if state["is_manual_mode"]:
-            dm.batch_update(js.get_event())
+            dm.batch_update(event)
         else:
             dm.batch_update(fetch_ai_command())
-            
+
+        if len(event) > 0:
+            for client in ws_clients:
+                client.sendMessage(json.dumps(state))
+
+main()
