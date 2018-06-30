@@ -17,6 +17,7 @@ from Device_Manager import Device_Manager, Device
 from Joystick import Joystick
 from ws_server import start_ws_server
 
+logging.basicConfig(level=logging.INFO)
 
 DC_MOTOR_PORT = 0
 SERVO_MOTOR_PORT = 1
@@ -91,6 +92,13 @@ def fetch_ai_command():
         "direction": 30
     }
 
+def broadcast_message(msg, clients):
+    for client in clients:
+        msg.update({
+            "ts": time.time()
+        })
+        client.sendMessage(unicode(json.dumps(msg)))
+
 def main():
     state = {
        "should_exit": False,
@@ -110,6 +118,8 @@ def main():
 
     logging.info("All services up and running")
     
+    last_ws_ts = time.time()
+
     while not state["should_exit"]:
         event = js.get_event()
         state.update(event)
@@ -120,8 +130,13 @@ def main():
         else:
             dm.batch_update(fetch_ai_command())
 
-        if len(event) > 0:
-            for client in ws_clients:
-                client.sendMessage(json.dumps(state))
+        if time.time() - last_ws_ts > 0.5:
+            broadcast_message(state, ws_clients)
+            last_ws_ts = time.time()
 
+        if time.time() - last_ws_ts > 0.1:
+            if len(event) > 0:
+                broadcast_message(event, ws_clients)
+                last_ws_ts = time.time()
+                    
 main()

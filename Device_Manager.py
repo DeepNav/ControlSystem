@@ -80,8 +80,8 @@ class Device_Manager(object):
         logging.info("Device %s::%s linked with event value %s", device_id, device_method_name, value_name)
     
     def batch_update(self, event):
-        for name, value in event:
-            for _, linked_events in self.event_links:
+        for name, value in event.iteritems():
+            for _, linked_events in self.event_links.iteritems():
                 for linked_event in linked_events:
                     ch = self.get(linked_event.device_id).ch
                     getattr(ch, linked_event["device_method_name"])(value)

@@ -18,3 +18,4 @@ def start_ws_server( ws_clients ):
     
     server = SimpleWebSocketServer('', 8000, Data_pusher)
     server.serveforever()
+    logging.info("ws_server started")
