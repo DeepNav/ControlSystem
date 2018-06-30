@@ -7,6 +7,8 @@ from numpy import interp
 
 pygame.init()
 
+clock = pygame.time.Clock()
+
 class Joystick(object):
     def __init__(self):
         # get pygame ready
@@ -47,6 +49,7 @@ class Joystick(object):
             }
 
     def get_event(self):
+        clock.tick(30)
         js = self
         js.event = {}
         for ev in pygame.event.get(pygame.JOYAXISMOTION):
