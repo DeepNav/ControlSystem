@@ -13,7 +13,6 @@ from Phidget22.Devices.DCMotor import *
 from Phidget22.Devices.GPS import *
 from Phidget22.PhidgetException import *
 
-import pygame
 from Device_Manager import Device_Manager, Device
 from Joystick import Joystick
 from ws_server import start_ws_server
@@ -66,23 +65,6 @@ def init_gps():
 
     return gps
 
-# a web socket server to push data to client
-def start_ws_server( ws_clients ):
-    class Data_pusher(WebSocket):
-        def handleMessage(self):
-            pass
-
-        def handleConnected(self):
-            print(self.address, 'ws_server: client connected')
-            ws_clients.append(self)
-
-        def handleClose(self):
-            ws_clients.remove(self)
-            print(self.address, 'ws_server: client closed')
-    
-    server = SimpleWebSocketServer('', 8000, Data_pusher)
-    server.serveforever()
-
 def setup():
     dm = Device_Manager()
     js = Joystick()
@@ -125,6 +107,8 @@ def main():
     )
     ws_server_thread.daemon = True
     ws_server_thread.start()
+
+    logging.info("All services up and running")
     
     while not state["should_exit"]:
         event = js.get_event()

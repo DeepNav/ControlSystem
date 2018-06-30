@@ -19,24 +19,26 @@ class Device_Manager(object):
         self.event_links = {}
     
     def __device_detached(self, id):
+        logging.warn("Device detached: %s", id)
         device = self.get(id)
         device.ch.open()
         device.is_attached = False
         self.waitUntilAllReady()
 
     def __device_attached(self, id):
+        logging.info("Device attached: %s", id)
         device = self.get(id)
         device.is_attached = True
 
     def __device_error(self, id, errorCode, errorString):
-        logging.error("device " + id + " down")
+        logging.error("Device error %s, %s", id, errorString)
         logging.error(errorCode)
-        logging.error(errorString)
 
     def get(self, id):
         return self.device_repo[id]
 
     def add(self, id, device):
+        logging.info("Device added to dm: %s", id)
         dm = self
         def onAttached(self):
             dm.__device_attached(id)
@@ -65,7 +67,7 @@ class Device_Manager(object):
                     someone_not_ready = True
                     time.sleep(1)
                     continue
-        logging.info("all devices are ready")
+        logging.info("all dm devices are ready")
     
     def link(self, device_id, device_method_name, value_name):
         link_obj = {
@@ -75,6 +77,7 @@ class Device_Manager(object):
         if value_name not in self.event_links:
             self.event_links[value_name] = []
         self.event_links[value_name].append(link_obj)
+        logging.info("Device %s::%s linked with event value %s", device_id, device_method_name, value_name)
     
     def batch_update(self, event):
         for name, value in event:
