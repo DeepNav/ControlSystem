@@ -7,7 +7,7 @@ from Phidget22.Phidget import Phidget
 class Device(object):
     def __init__(self, ch):
         self.ch = ch
-        self.id = None
+        self.device_id = None
         self.is_attached = False
         self.is_stable = True
         self.event = {}
@@ -21,28 +21,27 @@ class Device(object):
     def get_state(self):
         return self.state
     def set_event_val(self, key, val):
-        self.event[key] = val
-        self.state[key] = val
+        if (key in self.state and val != self.state[key]) or key not in self.state:
+            self.event[key] = val
+            self.state[key] = val
 
 class Device_Manager(object):
     def __init__(self):
         self.device_repo = {}
         self.event_links = {}
     
-    def __device_detached(self, id):
-        logging.warn("Device detached: %s", id)
-        device = self.get(id)
+    def __device_detached(self, device):
+        logging.warn("Device detached: %s", device.device_id)
         device.ch.open()
         device.is_attached = False
         self.waitUntilAllReady()
 
-    def __device_attached(self, id):
-        logging.info("Device attached: %s", id)
-        device = self.get(id)
+    def __device_attached(self, device):
+        logging.info("Device attached: %s", device.device_id)
         device.is_attached = True
 
-    def __device_error(self, id, errorCode, errorString):
-        logging.error("Device error %s, %s", id, errorString)
+    def __device_error(self, device, errorCode, errorString):
+        logging.error("Device error %s, %s", device.device_id, errorString)
         logging.error(errorCode)
 
     def get(self, id):
@@ -51,15 +50,16 @@ class Device_Manager(object):
     def add(self, id, device):
         logging.info("Device added to dm: %s", id)
         dm = self
+        device.device_id = id
         def onAttached(self):
-            dm.__device_attached(id)
+            dm.__device_attached(device)
         def onDetached(self):
-            dm.__device_detached(id)
+            dm.__device_detached(device)
         def onError(self, errorCode, errorString):
-            dm.__device_error(id, errorCode, errorString)
+            dm.__device_error(device, errorCode, errorString)
         # check if device a phdget device
         if isinstance(device.ch, Phidget):
-            self.device_repo[device.id] = device
+            self.device_repo[device.device_id] = device
             device.ch.setOnAttachHandler(onAttached)
             device.ch.setOnDetachHandler(onDetached)
             device.ch.setOnErrorHandler(onError)

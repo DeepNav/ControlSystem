@@ -31,7 +31,6 @@ def init_dc_motor():
     motor_ch.setChannel(0)
     motor_ch.setCurrentLimit(15.0)
     motor = Device(motor_ch)
-    motor.is_stable = True
     return motor
 
 def init_servo():
@@ -55,14 +54,15 @@ def init_gps():
         gps.is_stable = positionFixState
     
     def on_heading_change(self, heading, velocity):
-        logging.info("heading changed heading: %f, velocity: %f", heading, velocity)
-        gps.set_event_val("ground_speed", velocity)
+        logging.debug("heading changed heading: %f, velocity: %f", heading, velocity)
+        gps.set_event_val("ground_speed", round(velocity, 3))
+        gps.set_event_val("heading", heading)
     
     def on_position_change(self, latitude, longitude, altitude):
-        logging.info("postion changed lat: %f, lon: %f, alt: %f", latitude, longitude, altitude)
-        gps.set_event_val("lat", latitude)
-        gps.set_event_val("lng", longitude)
-        gps.set_event_val("alt", altitude)
+        logging.debug("postion changed lat: %f, lon: %f, alt: %f", latitude, longitude, altitude)
+        gps.set_event_val("lat", round(latitude, 6))
+        gps.set_event_val("lng", round(longitude, 6))
+        gps.set_event_val("alt", round(altitude, 2))
     
     ch.setOnPositionFixStateChangeHandler(on_fix_change)
     ch.setOnPositionChangeHandler(on_position_change)
@@ -73,7 +73,7 @@ def init_gps():
 def setup():
     dm = Device_Manager()
     js = Joystick()
-
+    '''
     dc_motor = init_dc_motor()
     dm.add("dc_motor", dc_motor)
 
@@ -82,7 +82,7 @@ def setup():
     servo = init_servo()
     dm.add("servo", servo)
     dm.link("servo", "setTargetPosition", "direction")
-
+'''
     gps = init_gps()
     dm.add("gps", gps)
     
@@ -123,6 +123,7 @@ def main():
     logging.info("All services up and running")
     
     last_ws_ts = time.time()
+    last_sync_ts = time.time()
 
     while not state["should_exit"]:
         event = js.get_event()
@@ -137,11 +138,11 @@ def main():
             dm.batch_update(fetch_ai_command())
 
         # broadcast state/event to client
-        if time.time() - last_ws_ts > 0.5:
+        if time.time() - last_sync_ts > 0.5:
             # sync state every 0.5s
             state.update(dm.get_state())
             broadcast_message(state, ws_clients)
-            last_ws_ts = time.time()
+            last_sync_ts = time.time()
 
         if time.time() - last_ws_ts > 0.1:
             # push delta only every 0.1s if there is any
@@ -149,5 +150,4 @@ def main():
             if len(event) > 0:
                 broadcast_message(event, ws_clients)
                 last_ws_ts = time.time()
-                    
 main()
