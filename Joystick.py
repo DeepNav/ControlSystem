@@ -55,7 +55,7 @@ class Joystick(object):
         for ev in pygame.event.get(pygame.JOYAXISMOTION):
             if ev.axis == js.key_mapping["STEER_AXIS"]:
                 js.direction = interp(ev.value, [-1, 1], [0, 180])
-                js.event["direction"] = js.direction
+                js.event["direction"] = round(js.direction, 2)
             if ev.axis == js.key_mapping["GEAR_CHANGE_AXIS"]:
                 if ev.value < (-0.7):
                     js.is_forward = 1
@@ -63,7 +63,7 @@ class Joystick(object):
                     js.is_forward = -1
             if ev.axis == js.key_mapping["THROTTLE_AXIS"]:
                 js.throttle = ( interp(ev.value, [-1, 1], [0, 1]) ) * js.is_forward
-                js.event["throttle"] = js.throttle
+                js.event["throttle"] = round(js.throttle, 2)
         for ev in pygame.event.get(pygame.JOYBUTTONDOWN):
             print("button pressed:", ev.button)
             if ev.button == js.key_mapping["STOP_BTN"]:

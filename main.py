@@ -47,7 +47,7 @@ def init_servo():
 
 def init_gps():
     ch = GPS()
-    ch.setDeviceSerialNumber(112233)
+    ch.setDeviceSerialNumber(285225)
     gps = Device(ch)
     gps.is_stable = False
 
@@ -56,9 +56,13 @@ def init_gps():
     
     def on_heading_change(self, heading, velocity):
         logging.info("heading changed heading: %f, velocity: %f", heading, velocity)
+        gps.set_event_val("ground_speed", velocity)
     
     def on_position_change(self, latitude, longitude, altitude):
         logging.info("postion changed lat: %f, lon: %f, alt: %f", latitude, longitude, altitude)
+        gps.set_event_val("lat", latitude)
+        gps.set_event_val("lng", longitude)
+        gps.set_event_val("alt", altitude)
     
     ch.setOnPositionFixStateChangeHandler(on_fix_change)
     ch.setOnPositionChangeHandler(on_position_change)
@@ -81,7 +85,7 @@ def setup():
 
     gps = init_gps()
     dm.add("gps", gps)
-
+    
     dm.waitUntilAllReady()
 
     return dm, js
@@ -123,6 +127,8 @@ def main():
     while not state["should_exit"]:
         event = js.get_event()
         state.update(event)
+
+        # dispatch control command
         if state["should_exit"]:
             continue
         if state["is_manual_mode"]:
@@ -130,11 +136,16 @@ def main():
         else:
             dm.batch_update(fetch_ai_command())
 
+        # broadcast state/event to client
         if time.time() - last_ws_ts > 0.5:
+            # sync state every 0.5s
+            state.update(dm.get_state())
             broadcast_message(state, ws_clients)
             last_ws_ts = time.time()
 
         if time.time() - last_ws_ts > 0.1:
+            # push delta only every 0.1s if there is any
+            event.update(dm.get_event())
             if len(event) > 0:
                 broadcast_message(event, ws_clients)
                 last_ws_ts = time.time()

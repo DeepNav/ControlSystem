@@ -10,8 +10,19 @@ class Device(object):
         self.id = None
         self.is_attached = False
         self.is_stable = True
+        self.event = {}
+        self.state = {}
     def is_ready(self):
         return ( self.is_attached and self.is_stable )
+    def get_event(self):
+        e = self.event
+        self.event = {}
+        return e
+    def get_state(self):
+        return self.state
+    def set_event_val(self, key, val):
+        self.event[key] = val
+        self.state[key] = val
 
 class Device_Manager(object):
     def __init__(self):
@@ -61,7 +72,7 @@ class Device_Manager(object):
         someone_not_ready = True
         while someone_not_ready:
             someone_not_ready = False
-            for id, device in self.device_repo:
+            for id, device in self.device_repo.iteritems():
                 if not device.is_ready():
                     logging.info("some device is not ready, keep waiting")
                     someone_not_ready = True
@@ -85,3 +96,13 @@ class Device_Manager(object):
                 for linked_event in linked_events:
                     ch = self.get(linked_event.device_id).ch
                     getattr(ch, linked_event["device_method_name"])(value)
+    def get_event(self):
+        event = {}
+        for id, device in self.device_repo.iteritems():
+            event.update(device.get_event())
+        return event
+    def get_state(self):
+        state = {}
+        for id, device in self.device_repo.iteritems():
+            state.update(device.get_state())
+        return state
