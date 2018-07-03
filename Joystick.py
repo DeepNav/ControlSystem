@@ -18,8 +18,9 @@ class Joystick(object):
         js = pygame.joystick.Joystick(0)
         js.init()
 
-        self.is_forward = 1
+        self.name = js.get_name()
 
+        self.is_forward = 1
         self.is_manual_mode = True
         self.is_cruise_mode = False
         self.throttle = 0.0
@@ -33,14 +34,26 @@ class Joystick(object):
     def get_key_mapping(self):
         if platform.system() == "Darwin":
             # mac with wired controller
-            return {
-                "SWITCH_MODE_BTN": 10,
-                "STOP_BTN": 12,
-                "STEER_AXIS": 0,
-                "THROTTLE_AXIS": 5,
-                "GEAR_CHANGE_AXIS": 3,
-                "CRUISE_MODE": 11,
-            }
+            if self.name == "Wireless Controller":
+                # ps4 controller via wire
+                return {
+                    "SWITCH_MODE_BTN": 12,
+                    "STOP_BTN": 2,
+                    "STEER_AXIS": 0,
+                    "THROTTLE_AXIS": 5,
+                    "GEAR_CHANGE_AXIS": 3,
+                    "CRUISE_MODE": 1,
+                }
+            elif self.name == "Xbox One Wired Controller":
+                # xbox one controller via wire
+                return {
+                    "SWITCH_MODE_BTN": 10,
+                    "STOP_BTN": 12,
+                    "STEER_AXIS": 0,
+                    "THROTTLE_AXIS": 5,
+                    "GEAR_CHANGE_AXIS": 3,
+                    "CRUISE_MODE": 11,
+                }
         elif platform.system() == "Linux":
             # raspberry pi
             return {

@@ -74,7 +74,7 @@ def init_gps():
 def setup():
     dm = Device_Manager()
     js = Joystick()
-    '''
+    
     dc_motor = init_dc_motor()
     dm.add("dc_motor", dc_motor)
 
@@ -83,7 +83,7 @@ def setup():
     servo = init_servo()
     dm.add("servo", servo)
     dm.link("servo", "setTargetPosition", "direction")
-'''
+
     gps = init_gps()
     dm.add("gps", gps)
     
