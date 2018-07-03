@@ -24,6 +24,8 @@ class Device(object):
         if (key in self.state and val != self.state[key]) or key not in self.state:
             self.event[key] = val
             self.state[key] = val
+    def on_attach(self):
+        pass
 
 class Device_Manager(object):
     def __init__(self):
@@ -39,6 +41,7 @@ class Device_Manager(object):
     def __device_attached(self, device):
         logging.info("Device attached: %s", device.device_id)
         device.is_attached = True
+        device.on_attach()
 
     def __device_error(self, device, errorCode, errorString):
         logging.error("Device error %s, %s", device.device_id, errorString)

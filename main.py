@@ -16,6 +16,7 @@ from Phidget22.PhidgetException import *
 from Device_Manager import Device_Manager, Device
 from Joystick import Joystick
 from ws_server import start_ws_server
+from Spatial import SpatialDevice
 
 logging.basicConfig(level=logging.INFO)
 
@@ -30,20 +31,23 @@ def init_dc_motor():
     motor_ch.setDeviceSerialNumber(HUB_SERIAL_NUM)
     motor_ch.setHubPort(DC_MOTOR_PORT)
     motor_ch.setChannel(0)
-    motor_ch.setCurrentLimit(15.0)
     motor = Device(motor_ch)
+    motor.on_attach = lambda self: motor_ch.setCurrentLimit(15.0)
     return motor
 
 def init_servo():
+    def on_attach():
+        servo_ch.setMinPulseWidth(500.0)
+        servo_ch.setMaxPulseWidth(2500.0)
+        servo_ch.setEngaged(1)
+        servo_ch.setTargetPosition(90)
     servo_ch = RCServo()
     servo_ch.setDeviceSerialNumber(HUB_SERIAL_NUM)
     servo_ch.setHubPort(SERVO_MOTOR_PORT)
     servo_ch.setChannel(SERVO_MOTOR_CHANNEL)
-    servo_ch.setMinPulseWidth(500.0)
-    servo_ch.setMaxPulseWidth(2500.0)
-    servo_ch.setTargetPosition(90)
-    servo_ch.setEngaged(1)
-    return Device(servo_ch)
+    servo = Device(servo_ch)
+    servo.on_attach = on_attach
+    return servo
 
 def init_gps():
     ch = GPS()
@@ -86,7 +90,8 @@ def setup():
 
     gps = init_gps()
     dm.add("gps", gps)
-    
+
+    dm.add("spatial", SpatialDevice())
     dm.waitUntilAllReady()
 
     return dm, js
