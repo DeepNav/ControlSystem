@@ -69,7 +69,7 @@ class Joystick(object):
                 js.throttle = ( interp(ev.value, [-1, 1], [0, 1]) ) * js.is_forward
                 js.event["throttle"] = round(js.throttle, 2)
         for ev in pygame.event.get(pygame.JOYBUTTONDOWN):
-            logging.debug("button pressed:", ev.button)
+            logging.debug("button pressed: %d", ev.button)
             if ev.button == js.key_mapping["STOP_BTN"]:
                 js.should_exit = True
                 js.event["should_exit"] = js.should_exit
