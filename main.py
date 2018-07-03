@@ -107,6 +107,7 @@ def main():
     state = {
        "should_exit": False,
        "is_manual_mode": True,
+       "is_cruise_mode": False,
     }
 
     dm, js = setup()
@@ -127,15 +128,24 @@ def main():
 
     while not state["should_exit"]:
         event = js.get_event()
-        state.update(event)
 
         # dispatch control command
-        if state["should_exit"]:
-            continue
         if state["is_manual_mode"]:
+            if state["is_cruise_mode"]:
+                if "direction" in event:
+                    event["direction"] = state["direction"]
+                if "throttle" in event:
+                    event["throttle"] = state["throttle"]
             dm.batch_update(event)
         else:
-            dm.batch_update(fetch_ai_command())
+            ai_command = fetch_ai_command()
+            state.update(ai_command)
+            event.update(ai_command)
+            dm.batch_update(ai_command)
+        
+        state.update(event)
+        if state["should_exit"]:
+            continue
 
         # broadcast state/event to client
         if time.time() - last_sync_ts > 0.5:
