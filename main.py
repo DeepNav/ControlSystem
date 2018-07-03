@@ -12,6 +12,7 @@ from Phidget22.Devices.RCServo import *
 from Phidget22.Devices.DCMotor import *
 from Phidget22.Devices.GPS import *
 from Phidget22.PhidgetException import *
+from Phidget22.Devices.FrequencyCounter import *
 
 from Device_Manager import Device_Manager, Device
 from Joystick import Joystick
@@ -22,9 +23,10 @@ logging.basicConfig(level=logging.INFO)
 
 DC_MOTOR_PORT = 0
 SERVO_MOTOR_PORT = 1
-SERVO_MOTOR_CHANNEL = 15
+SERVO_MOTOR_CHANNEL = 0
 HUB_SERIAL_NUM = 529516
 GPS_SERIAL_NUM = 285225
+WINDSPEED_PORT_NUM = 2
 
 def init_dc_motor():
     motor_ch = DCMotor()
@@ -36,15 +38,17 @@ def init_dc_motor():
     return motor
 
 def init_servo():
+    servo_ch = RCServo()
+    servo_ch.setDeviceSerialNumber(HUB_SERIAL_NUM)
+    servo_ch.setHubPort(SERVO_MOTOR_PORT)
+    servo_ch.setChannel(SERVO_MOTOR_CHANNEL)
+
     def on_attach():
         servo_ch.setMinPulseWidth(500.0)
         servo_ch.setMaxPulseWidth(2500.0)
         servo_ch.setEngaged(1)
         servo_ch.setTargetPosition(90)
-    servo_ch = RCServo()
-    servo_ch.setDeviceSerialNumber(HUB_SERIAL_NUM)
-    servo_ch.setHubPort(SERVO_MOTOR_PORT)
-    servo_ch.setChannel(SERVO_MOTOR_CHANNEL)
+
     servo = Device(servo_ch)
     servo.on_attach = on_attach
     return servo
@@ -75,10 +79,28 @@ def init_gps():
 
     return gps
 
+def init_wind_speed():
+    ch = FrequencyCounter()
+
+    ch.setDeviceSerialNumber(HUB_SERIAL_NUM)
+    ch.setHubPort(WINDSPEED_PORT_NUM)
+
+    def on_attach(ch):
+        ch.setDataInterval(500)
+    
+    def on_frequency_change(ch, frequency):
+        # wind speed (mph) = frequency * 1.492
+        wind_speed.set_event_val("wind_speed", frequency* 1.492)
+
+    wind_speed = Device(ch)
+    wind_speed.on_attach = on_attach
+    ch.setOnFrequencyChangeHandler(on_frequency_change)
+    return wind_speed
+
 def setup():
     dm = Device_Manager()
     js = Joystick()
-    
+    '''
     dc_motor = init_dc_motor()
     dm.add("dc_motor", dc_motor)
 
@@ -88,9 +110,10 @@ def setup():
     dm.add("servo", servo)
     dm.link("servo", "setTargetPosition", "direction")
 
-    gps = init_gps()
-    dm.add("gps", gps)
+    dm.add("gps", init_gps())
 
+    dm.add("wind_speed", init_wind_speed())
+    '''
     dm.add("spatial", SpatialDevice())
     dm.waitUntilAllReady()
 

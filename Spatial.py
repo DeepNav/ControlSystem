@@ -13,7 +13,7 @@ class SpatialDevice(Device):
 
         self.last_angles = [0.0, 0.0, 0.0]
         self.compass_bearing_filter = []
-        self.bearing_filter_size = 10
+        self.bearing_filter_size = 2
         self.compass_bearing = 0
     
     def on_attach(self):
