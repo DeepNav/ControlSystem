@@ -23,6 +23,7 @@ DC_MOTOR_PORT = 0
 SERVO_MOTOR_PORT = 1
 SERVO_MOTOR_CHANNEL = 15
 HUB_SERIAL_NUM = 529516
+GPS_SERIAL_NUM = 285225
 
 def init_dc_motor():
     motor_ch = DCMotor()
@@ -46,7 +47,7 @@ def init_servo():
 
 def init_gps():
     ch = GPS()
-    ch.setDeviceSerialNumber(285225)
+    ch.setDeviceSerialNumber(GPS_SERIAL_NUM)
     gps = Device(ch)
     gps.is_stable = False
 
