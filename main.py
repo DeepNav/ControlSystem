@@ -132,13 +132,11 @@ def setup():
     dm = Device_Manager()
     js = Joystick()
 
-    dc_motor = init_dc_motor()
-    dm.add("dc_motor", dc_motor)
+    dm.add("dc_motor", init_dc_motor())
 
     dm.link("dc_motor", "setTargetVelocity", "throttle")
 
-    servo = init_servo()
-    dm.add("servo", servo)
+    dm.add("servo", init_servo())
     dm.link("servo", "setTargetPosition", "direction",
             lambda val: interp(val, [0, 180], [45, 135]))
 
