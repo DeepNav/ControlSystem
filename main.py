@@ -47,16 +47,19 @@ WATER_SPEED_BACKWARD_PORT = 1
 WATER_SPEED_LEFT_PORT = 2
 WATER_SPEED_RIGHT_PORT = 3
 
+
 def init_dc_motor():
     motor_ch = DCMotor()
     motor_ch.setDeviceSerialNumber(DC_MOTOR_HUB)
     motor_ch.setHubPort(DC_MOTOR_PORT)
     motor_ch.setChannel(0)
     motor = Device(motor_ch)
+
     def on_attach():
         motor_ch.setCurrentLimit(15.0)
-    motor.on_attach = on_attach 
+    motor.on_attach = on_attach
     return motor
+
 
 def init_servo():
     servo_ch = RCServo()
@@ -74,6 +77,7 @@ def init_servo():
     servo.on_attach = on_attach
     return servo
 
+
 def init_gps():
     ch = GPS()
     ch.setDeviceSerialNumber(GPS_SERIAL_NUM)
@@ -83,23 +87,26 @@ def init_gps():
     def on_fix_change(self, positionFixState):
         #gps.is_stable = positionFixState
         pass
-    
+
     def on_heading_change(self, heading, velocity):
-        logging.debug("heading changed heading: %f, velocity: %f", heading, velocity)
+        logging.debug("heading changed heading: %f, velocity: %f",
+                      heading, velocity)
         gps.set_event_val("ground_speed", round(velocity, 3))
         gps.set_event_val("heading", heading)
-    
+
     def on_position_change(self, latitude, longitude, altitude):
-        logging.debug("postion changed lat: %f, lon: %f, alt: %f", latitude, longitude, altitude)
+        logging.debug("postion changed lat: %f, lon: %f, alt: %f",
+                      latitude, longitude, altitude)
         gps.set_event_val("lat", round(latitude, 6))
         gps.set_event_val("lng", round(longitude, 6))
         gps.set_event_val("alt", round(altitude, 2))
-    
+
     ch.setOnPositionFixStateChangeHandler(on_fix_change)
     ch.setOnPositionChangeHandler(on_position_change)
     ch.setOnHeadingChangeHandler(on_heading_change)
 
     return gps
+
 
 def init_wind_speed():
     ch = FrequencyCounter()
@@ -114,16 +121,17 @@ def init_wind_speed():
 
     def on_frequency_change(ch, frequency):
         # wind speed (mph) = frequency * 1.492
-        wind_speed.set_event_val("wind_speed", frequency* 1.492)
+        wind_speed.set_event_val("wind_speed", frequency * 1.492)
 
     wind_speed.on_attach = on_attach
     ch.setOnFrequencyChangeHandler(on_frequency_change)
     return wind_speed
 
+
 def setup():
     dm = Device_Manager()
     js = Joystick()
-    
+
     dc_motor = init_dc_motor()
     dm.add("dc_motor", dc_motor)
 
@@ -131,29 +139,37 @@ def setup():
 
     servo = init_servo()
     dm.add("servo", servo)
-    dm.link( "servo", "setTargetPosition", "direction", lambda val: interp(val, [0, 180], [45, 135]) )
+    dm.link("servo", "setTargetPosition", "direction",
+            lambda val: interp(val, [0, 180], [45, 135]))
 
     dm.add("gps", init_gps())
 
     dm.add("wind_speed", init_wind_speed())
-    dm.add("wind_direction", WindDirectionDevice(WIND_HUB, WIND_DIRECTION_PORT))
-    
+    dm.add("wind_direction", WindDirectionDevice(
+        WIND_HUB, WIND_DIRECTION_PORT))
+
     dm.add("spatial", SpatialDevice())
 
-    dm.add("water_speed_forward", WaterSpeedDevice("forward", WATER_SPEED_HUB, WATER_SPEED_FORWARD_PORT))
-    dm.add("water_speed_backward", WaterSpeedDevice("backward", WATER_SPEED_HUB, WATER_SPEED_BACKWARD_PORT))
-    dm.add("water_speed_left", WaterSpeedDevice("left", WATER_SPEED_HUB, WATER_SPEED_LEFT_PORT))
-    dm.add("water_speed_right", WaterSpeedDevice("right", WATER_SPEED_HUB, WATER_SPEED_RIGHT_PORT))
+    dm.add("water_speed_forward", WaterSpeedDevice(
+        "forward", WATER_SPEED_HUB, WATER_SPEED_FORWARD_PORT))
+    dm.add("water_speed_backward", WaterSpeedDevice(
+        "backward", WATER_SPEED_HUB, WATER_SPEED_BACKWARD_PORT))
+    dm.add("water_speed_left", WaterSpeedDevice(
+        "left", WATER_SPEED_HUB, WATER_SPEED_LEFT_PORT))
+    dm.add("water_speed_right", WaterSpeedDevice(
+        "right", WATER_SPEED_HUB, WATER_SPEED_RIGHT_PORT))
 
     dm.waitUntilAllReady()
 
     return dm, js
+
 
 def fetch_ai_command():
     return {
         "throttle": 0.2,
         "direction": 30
     }
+
 
 def broadcast_message(msg, clients):
     for client in clients:
@@ -162,11 +178,12 @@ def broadcast_message(msg, clients):
         })
         client.sendMessage(unicode(json.dumps(msg)))
 
+
 def main():
     state = {
-       "should_exit": False,
-       "is_manual_mode": True,
-       "is_cruise_mode": False,
+        "should_exit": False,
+        "is_manual_mode": True,
+        "is_cruise_mode": False,
     }
 
     dm, js = setup()
@@ -181,7 +198,7 @@ def main():
     ws_server_thread.start()
 
     logging.info("All services up and running")
-    
+
     last_ws_ts = time.time()
     last_sync_ts = time.time()
 
@@ -201,7 +218,7 @@ def main():
             state.update(ai_command)
             event.update(ai_command)
             dm.batch_update(ai_command)
-        
+
         state.update(event)
         if state["should_exit"]:
             continue
@@ -219,4 +236,6 @@ def main():
             if len(event) > 0:
                 broadcast_message(event, ws_clients)
                 last_ws_ts = time.time()
+
+
 main()

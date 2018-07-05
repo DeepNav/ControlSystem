@@ -26,11 +26,10 @@ class WindDirectionDevice(Device):
         ]
         self.v_d_tuples = []
         self.init_voltage_range_map()
-        
+
         self.ch = VoltageInput()
         self.ch.setDeviceSerialNumber(HUB_SERIAL_NUM)
         self.ch.setHubPort(PORT_NUM)
-        
 
     def __to_internal_v(self, v):
         return int(round(v*100))

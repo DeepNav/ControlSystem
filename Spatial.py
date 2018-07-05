@@ -15,7 +15,7 @@ class SpatialDevice(Device):
         self.compass_bearing_filter = []
         self.bearing_filter_size = 2
         self.compass_bearing = 0
-    
+
     def on_attach(self):
         self.ch.setDataInterval(500)
 
@@ -79,8 +79,11 @@ class SpatialDevice(Device):
 
             # Convert radians to degrees for display
             self.compass_bearing = yaw_angle * (180.0 / math.pi) % 360
-            self.set_event_val("compass_bearing", round(self.compass_bearing, 3))
-            self.set_event_val("pitch_angle", round(pitch_angle* (180.0 / math.pi), 3))
-            self.set_event_val("roll_angle", round(roll_angle* (180.0 / math.pi), 3))
+            self.set_event_val("compass_bearing",
+                               round(self.compass_bearing, 3))
+            self.set_event_val("pitch_angle", round(
+                pitch_angle * (180.0 / math.pi), 3))
+            self.set_event_val("roll_angle", round(
+                roll_angle * (180.0 / math.pi), 3))
         except Exception as e:
             logging.error(e)

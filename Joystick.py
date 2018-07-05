@@ -10,6 +10,7 @@ pygame.init()
 
 clock = pygame.time.Clock()
 
+
 class Joystick(object):
     def __init__(self):
         # get pygame ready
@@ -79,7 +80,8 @@ class Joystick(object):
                 elif ev.value > (0.7):
                     js.is_forward = -1
             if ev.axis == js.key_mapping["THROTTLE_AXIS"]:
-                js.throttle = ( interp(ev.value, [-1, 1], [0, 1]) ) * js.is_forward
+                js.throttle = (
+                    interp(ev.value, [-1, 1], [0, 1])) * js.is_forward
                 js.event["throttle"] = round(js.throttle, 2)
         for ev in pygame.event.get(pygame.JOYBUTTONDOWN):
             logging.debug("button pressed: %d", ev.button)
