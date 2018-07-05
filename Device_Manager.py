@@ -22,8 +22,9 @@ class Device(object):
         return self.state
     def set_event_val(self, key, val):
         if (key in self.state and val != self.state[key]) or key not in self.state:
-            self.event[key] = val
-            self.state[key] = val
+            if val is not None:
+                self.event[key] = val
+                self.state[key] = val
     def on_attach(self):
         pass
 

@@ -18,6 +18,7 @@ from Device_Manager import Device_Manager, Device
 from Joystick import Joystick
 from ws_server import start_ws_server
 from Spatial import SpatialDevice
+from Wind_Direction import WindDirectionDevice
 
 logging.basicConfig(level=logging.INFO)
 
@@ -115,9 +116,11 @@ def setup():
 
     dm.add("gps", init_gps())
 
-    # dm.add("wind_speed", init_wind_speed())
+    dm.add("wind_speed", init_wind_speed())
+    dm.add("wind_direction", WindDirectionDevice())
     
     dm.add("spatial", SpatialDevice())
+
     dm.waitUntilAllReady()
 
     return dm, js
