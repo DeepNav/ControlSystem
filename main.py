@@ -21,8 +21,8 @@ from Spatial import SpatialDevice
 
 logging.basicConfig(level=logging.INFO)
 
-DC_MOTOR_PORT = 0
-SERVO_MOTOR_PORT = 1
+DC_MOTOR_PORT = 1
+SERVO_MOTOR_PORT = 5
 SERVO_MOTOR_CHANNEL = 0
 HUB_SERIAL_NUM = 529516
 GPS_SERIAL_NUM = 285225
@@ -34,7 +34,9 @@ def init_dc_motor():
     motor_ch.setHubPort(DC_MOTOR_PORT)
     motor_ch.setChannel(0)
     motor = Device(motor_ch)
-    motor.on_attach = lambda self: motor_ch.setCurrentLimit(15.0)
+    def on_attach():
+        motor_ch.setCurrentLimit(15.0)
+    motor.on_attach = on_attach 
     return motor
 
 def init_servo():
@@ -46,8 +48,8 @@ def init_servo():
     def on_attach():
         servo_ch.setMinPulseWidth(500.0)
         servo_ch.setMaxPulseWidth(2500.0)
-        servo_ch.setEngaged(1)
         servo_ch.setTargetPosition(90)
+        servo_ch.setEngaged(1)
 
     servo = Device(servo_ch)
     servo.on_attach = on_attach
@@ -57,10 +59,11 @@ def init_gps():
     ch = GPS()
     ch.setDeviceSerialNumber(GPS_SERIAL_NUM)
     gps = Device(ch)
-    gps.is_stable = False
+    gps.is_stable = True
 
     def on_fix_change(self, positionFixState):
-        gps.is_stable = positionFixState
+        #gps.is_stable = positionFixState
+        pass
     
     def on_heading_change(self, heading, velocity):
         logging.debug("heading changed heading: %f, velocity: %f", heading, velocity)
@@ -100,7 +103,7 @@ def init_wind_speed():
 def setup():
     dm = Device_Manager()
     js = Joystick()
-    '''
+    
     dc_motor = init_dc_motor()
     dm.add("dc_motor", dc_motor)
 
@@ -108,12 +111,12 @@ def setup():
 
     servo = init_servo()
     dm.add("servo", servo)
-    dm.link("servo", "setTargetPosition", "direction")
+    dm.link( "servo", "setTargetPosition", "direction", lambda val: interp(val, [0, 180], [45, 135]) )
 
     dm.add("gps", init_gps())
 
-    dm.add("wind_speed", init_wind_speed())
-    '''
+    # dm.add("wind_speed", init_wind_speed())
+    
     dm.add("spatial", SpatialDevice())
     dm.waitUntilAllReady()
 

@@ -77,16 +77,17 @@ class Device_Manager(object):
             someone_not_ready = False
             for id, device in self.device_repo.iteritems():
                 if not device.is_ready():
-                    logging.info("some device is not ready, keep waiting")
+                    logging.info("some device is not ready, keep waiting: %s", device.device_id)
                     someone_not_ready = True
                     time.sleep(1)
                     continue
         logging.info("all dm devices are ready")
     
-    def link(self, device_id, device_method_name, value_name):
+    def link(self, device_id, device_method_name, value_name, value_translator = lambda val: val):
         link_obj = {
             "device_id": device_id,
             "device_method_name": device_method_name,
+            "value_translator": value_translator,
         }
         if value_name not in self.event_links:
             self.event_links[value_name] = []
@@ -95,10 +96,11 @@ class Device_Manager(object):
     
     def batch_update(self, event):
         for name, value in event.iteritems():
-            for _, linked_events in self.event_links.iteritems():
-                for linked_event in linked_events:
-                    ch = self.get(linked_event.device_id).ch
-                    getattr(ch, linked_event["device_method_name"])(value)
+            if name in self.event_links:
+                for linked_event in self.event_links[name]:
+                    ch = self.get(linked_event["device_id"]).ch
+                    # print("going to set %s func: %s, with val %f", linked_event["device_id"], linked_event["device_method_name"], value)
+                    getattr(ch, linked_event["device_method_name"])( linked_event["value_translator"](value) )
     def get_event(self):
         event = {}
         for id, device in self.device_repo.iteritems():
