@@ -19,19 +19,37 @@ from Joystick import Joystick
 from ws_server import start_ws_server
 from Spatial import SpatialDevice
 from Wind_Direction import WindDirectionDevice
+from Water_Speed import WaterSpeedDevice
 
 logging.basicConfig(level=logging.INFO)
 
-DC_MOTOR_PORT = 1
-SERVO_MOTOR_PORT = 5
-SERVO_MOTOR_CHANNEL = 0
-HUB_SERIAL_NUM = 529516
+HUB_0 = 529516
+HUB_1 = 529517
 GPS_SERIAL_NUM = 285225
-WINDSPEED_PORT_NUM = 2
+
+DC_MOTOR_HUB = HUB_0
+DC_MOTOR_PORT = 0
+
+SERVO_HUB = HUB_0
+SERVO_PORT = 1
+SERVO_CHANNEL = 0
+
+SPATIAL_HUB = HUB_0
+SPATIAL_PORT = 2
+
+WIND_HUB = HUB_0
+WIND_SPEED_PORT = 3
+WIND_DIRECTION_PORT = 4
+
+WATER_SPEED_HUB = HUB_1
+WATER_SPEED_FORWARD_PORT = 0
+WATER_SPEED_BACKWARD_PORT = 1
+WATER_SPEED_LEFT_PORT = 2
+WATER_SPEED_RIGHT_PORT = 3
 
 def init_dc_motor():
     motor_ch = DCMotor()
-    motor_ch.setDeviceSerialNumber(HUB_SERIAL_NUM)
+    motor_ch.setDeviceSerialNumber(DC_MOTOR_HUB)
     motor_ch.setHubPort(DC_MOTOR_PORT)
     motor_ch.setChannel(0)
     motor = Device(motor_ch)
@@ -42,9 +60,9 @@ def init_dc_motor():
 
 def init_servo():
     servo_ch = RCServo()
-    servo_ch.setDeviceSerialNumber(HUB_SERIAL_NUM)
-    servo_ch.setHubPort(SERVO_MOTOR_PORT)
-    servo_ch.setChannel(SERVO_MOTOR_CHANNEL)
+    servo_ch.setDeviceSerialNumber(SERVO_HUB)
+    servo_ch.setHubPort(SERVO_PORT)
+    servo_ch.setChannel(SERVO_CHANNEL)
 
     def on_attach():
         servo_ch.setMinPulseWidth(500.0)
@@ -86,17 +104,18 @@ def init_gps():
 def init_wind_speed():
     ch = FrequencyCounter()
 
-    ch.setDeviceSerialNumber(HUB_SERIAL_NUM)
-    ch.setHubPort(WINDSPEED_PORT_NUM)
+    ch.setDeviceSerialNumber(WIND_HUB)
+    ch.setHubPort(WIND_SPEED_PORT)
 
     def on_attach(ch):
         ch.setDataInterval(500)
-    
+
+    wind_speed = Device(ch)
+
     def on_frequency_change(ch, frequency):
         # wind speed (mph) = frequency * 1.492
         wind_speed.set_event_val("wind_speed", frequency* 1.492)
 
-    wind_speed = Device(ch)
     wind_speed.on_attach = on_attach
     ch.setOnFrequencyChangeHandler(on_frequency_change)
     return wind_speed
@@ -117,9 +136,14 @@ def setup():
     dm.add("gps", init_gps())
 
     dm.add("wind_speed", init_wind_speed())
-    dm.add("wind_direction", WindDirectionDevice())
+    dm.add("wind_direction", WindDirectionDevice(WIND_HUB, WIND_DIRECTION_PORT))
     
     dm.add("spatial", SpatialDevice())
+
+    dm.add("water_speed_forward", WaterSpeedDevice("forward", WATER_SPEED_HUB, WATER_SPEED_FORWARD_PORT))
+    dm.add("water_speed_backward", WaterSpeedDevice("backward", WATER_SPEED_HUB, WATER_SPEED_BACKWARD_PORT))
+    dm.add("water_speed_left", WaterSpeedDevice("left", WATER_SPEED_HUB, WATER_SPEED_LEFT_PORT))
+    dm.add("water_speed_right", WaterSpeedDevice("right", WATER_SPEED_HUB, WATER_SPEED_RIGHT_PORT))
 
     dm.waitUntilAllReady()
 

@@ -3,11 +3,8 @@ import logging
 from Phidget22.Devices.VoltageInput import *
 from Device_Manager import Device
 
-PORT_NUM = 4
-HUB_SERIAL_NUM = 529516
-
 class WindDirectionDevice(Device):
-    def __init__(self):
+    def __init__(self, HUB_SERIAL_NUM, PORT_NUM):
         self.v_d_tuples_raw = [
             (3.84, 0),
             (1.98, 22.5),
