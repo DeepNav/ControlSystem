@@ -9,7 +9,6 @@ class SpatialDevice(Device):
     def __init__(self):
         self.ch = Spatial()
         super(SpatialDevice, self).__init__(self.ch)
-        self.ch.setOnSpatialDataHandler(self.__on_data)
 
         self.last_angles = [0.0, 0.0, 0.0]
         self.compass_bearing_filter = []
@@ -18,6 +17,7 @@ class SpatialDevice(Device):
 
     def on_attach(self):
         self.ch.setDataInterval(500)
+        self.listen("SpatialData", self.__on_data)
 
     def __on_data(self, ch, acceleration, angularRate, magneticField, timestamp):
         self.CalculateBearing(acceleration, angularRate,

@@ -13,6 +13,7 @@ class Device(object):
         self.is_stable = True
         self.event = {}
         self.state = {}
+        self.ch_event_listernings = {}
 
     def is_ready(self):
         return (self.is_attached and self.is_stable)
@@ -34,6 +35,21 @@ class Device(object):
     def on_attach(self):
         pass
 
+    def listen(self, event_name, callback_fn):
+        getattr(self.ch, "setOn" + event_name + "Handler")(callback_fn)
+        self.ch_event_listernings[event_name] = callback_fn
+
+    def unlisten(self, event_name):
+        getattr(self.ch, "setOn" + event_name + "Handler")(None)
+
+    def unlisten_all(self):
+        for event_name, callback_fn in self.ch_event_listernings.iteritems():
+            self.unlisten(event_name)
+
+    def restore_listerners(self):
+        for event_name, callback_fn in self.ch_event_listernings.iteritems():
+            self.listen(event_name, callback_fn)
+
 
 class Device_Manager(object):
     def __init__(self):
@@ -42,6 +58,7 @@ class Device_Manager(object):
 
     def __device_detached(self, device):
         logging.warn("Device detached: %s", device.device_id)
+        device.unlisten_all()
         device.ch.open()
         device.is_attached = False
         self.waitUntilAllReady()
@@ -111,10 +128,14 @@ class Device_Manager(object):
         for name, value in event.iteritems():
             if name in self.event_links:
                 for linked_event in self.event_links[name]:
-                    ch = self.get(linked_event["device_id"]).ch
-                    # print("going to set %s func: %s, with val %f", linked_event["device_id"], linked_event["device_method_name"], value)
-                    getattr(ch, linked_event["device_method_name"])(
-                        linked_event["value_translator"](value))
+                    device = self.get(linked_event["device_id"])
+                    if device.is_ready():
+                        ch = self.get(linked_event["device_id"]).ch
+                        getattr(ch, linked_event["device_method_name"])(
+                            linked_event["value_translator"](value))
+                    else:
+                        logging.warning(
+                            "%s is not ready when dispatching event", device.device_id)
 
     def get_event(self):
         event = {}

@@ -16,11 +16,7 @@ class WaterSpeedDevice(Device):
         self.event_key_name = "water_speed_" + water_direction
         self.ch = ch
 
-        def on_frequency_change(ch, frequency):
-            water_speed = self.get_water_speed(frequency)
-            self.set_event_val(self.event_key_name, water_speed)
-
-        ch.setOnFrequencyChangeHandler(on_frequency_change)
+        super(WaterSpeedDevice, self).__init__(ch)
 
     def get_water_speed(self, frequency):
         # f = Q*7.5, Q is the flowspeed in L/min
@@ -28,4 +24,11 @@ class WaterSpeedDevice(Device):
         return flowspeed / SECTIONAL_AREA
 
     def on_attach(self):
+        device = self
         self.ch.setDataInterval(500)
+
+        def on_frequency_change(ch, frequency):
+            water_speed = device.get_water_speed(frequency)
+            device.set_event_val(device.event_key_name, water_speed)
+
+        self.listen("FrequencyChange", on_frequency_change)

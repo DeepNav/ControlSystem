@@ -20,6 +20,9 @@ from ws_server import start_ws_server
 from Spatial import SpatialDevice
 from Wind_Direction import WindDirectionDevice
 from Water_Speed import WaterSpeedDevice
+from Motor import DCMotorDevice, ServoMotorDevice
+from GPSDevice import GPSDevice
+from Wind_Speed import WindSpeedDevice
 
 logging.basicConfig(level=logging.INFO)
 
@@ -48,101 +51,20 @@ WATER_SPEED_LEFT_PORT = 2
 WATER_SPEED_RIGHT_PORT = 3
 
 
-def init_dc_motor():
-    motor_ch = DCMotor()
-    motor_ch.setDeviceSerialNumber(DC_MOTOR_HUB)
-    motor_ch.setHubPort(DC_MOTOR_PORT)
-    motor_ch.setChannel(0)
-    motor = Device(motor_ch)
-
-    def on_attach():
-        motor_ch.setCurrentLimit(15.0)
-    motor.on_attach = on_attach
-    return motor
-
-
-def init_servo():
-    servo_ch = RCServo()
-    servo_ch.setDeviceSerialNumber(SERVO_HUB)
-    servo_ch.setHubPort(SERVO_PORT)
-    servo_ch.setChannel(SERVO_CHANNEL)
-
-    def on_attach():
-        servo_ch.setMinPulseWidth(500.0)
-        servo_ch.setMaxPulseWidth(2500.0)
-        servo_ch.setTargetPosition(90)
-        servo_ch.setEngaged(1)
-
-    servo = Device(servo_ch)
-    servo.on_attach = on_attach
-    return servo
-
-
-def init_gps():
-    ch = GPS()
-    ch.setDeviceSerialNumber(GPS_SERIAL_NUM)
-    gps = Device(ch)
-    gps.is_stable = True
-
-    def on_fix_change(self, positionFixState):
-        #gps.is_stable = positionFixState
-        pass
-
-    def on_heading_change(self, heading, velocity):
-        logging.debug("heading changed heading: %f, velocity: %f",
-                      heading, velocity)
-        gps.set_event_val("ground_speed", round(velocity, 3))
-        gps.set_event_val("heading", heading)
-
-    def on_position_change(self, latitude, longitude, altitude):
-        logging.debug("postion changed lat: %f, lon: %f, alt: %f",
-                      latitude, longitude, altitude)
-        gps.set_event_val("lat", round(latitude, 6))
-        gps.set_event_val("lng", round(longitude, 6))
-        gps.set_event_val("alt", round(altitude, 2))
-
-    ch.setOnPositionFixStateChangeHandler(on_fix_change)
-    ch.setOnPositionChangeHandler(on_position_change)
-    ch.setOnHeadingChangeHandler(on_heading_change)
-
-    return gps
-
-
-def init_wind_speed():
-    ch = FrequencyCounter()
-
-    ch.setDeviceSerialNumber(WIND_HUB)
-    ch.setHubPort(WIND_SPEED_PORT)
-
-    def on_attach(ch):
-        ch.setDataInterval(500)
-
-    wind_speed = Device(ch)
-
-    def on_frequency_change(ch, frequency):
-        # wind speed (mph) = frequency * 1.492
-        wind_speed.set_event_val("wind_speed", frequency * 1.492)
-
-    wind_speed.on_attach = on_attach
-    ch.setOnFrequencyChangeHandler(on_frequency_change)
-    return wind_speed
-
-
 def setup():
     dm = Device_Manager()
     js = Joystick()
 
-    dm.add("dc_motor", init_dc_motor())
-
+    dm.add("dc_motor", DCMotorDevice(DC_MOTOR_HUB, DC_MOTOR_PORT))
     dm.link("dc_motor", "setTargetVelocity", "throttle")
 
-    dm.add("servo", init_servo())
+    dm.add("servo", ServoMotorDevice(SERVO_HUB, SERVO_PORT, SERVO_CHANNEL))
     dm.link("servo", "setTargetPosition", "direction",
             lambda val: interp(val, [0, 180], [45, 135]))
 
-    dm.add("gps", init_gps())
+    dm.add("gps", GPSDevice(GPS_SERIAL_NUM))
 
-    dm.add("wind_speed", init_wind_speed())
+    dm.add("wind_speed", WindSpeedDevice(WIND_HUB, WIND_SPEED_PORT))
     dm.add("wind_direction", WindDirectionDevice(
         WIND_HUB, WIND_DIRECTION_PORT))
 

@@ -26,15 +26,17 @@ class WindDirectionDevice(Device):
         ]
         self.v_d_tuples = []
         self.init_voltage_range_map()
-        
+
         self.ch = VoltageInput()
         self.ch.setDeviceSerialNumber(HUB_SERIAL_NUM)
         self.ch.setHubPort(PORT_NUM)
-        
+
+        super(WindDirectionDevice, self).__init__(self.ch)
+
     def on_attach(self):
         self.ch.setDataInterval(500)
         self.ch.setVoltageChangeTrigger(0.01)
-        self.ch.setOnVoltageChangeHandler(self.onVoltageChangeHandler)
+        self.listen("VoltageChange", self.onVoltageChangeHandler)
 
     def onVoltageChangeHandler(self, ch, voltage):
         logging.debug("voltage changed to %f", voltage)
