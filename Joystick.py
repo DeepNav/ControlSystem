@@ -1,7 +1,6 @@
 import pygame
 import platform
 import os
-import threading
 import logging
 
 from numpy import interp

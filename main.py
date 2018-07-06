@@ -1,7 +1,4 @@
-import sys
 import time
-import os
-import platform
 import logging
 import threading
 
