@@ -26,14 +26,11 @@ class WindDirectionDevice(Device):
         ]
         self.v_d_tuples = []
         self.init_voltage_range_map()
-
+        
         self.ch = VoltageInput()
         self.ch.setDeviceSerialNumber(HUB_SERIAL_NUM)
         self.ch.setHubPort(PORT_NUM)
-
-    def __to_internal_v(self, v):
-        return int(round(v*100))
-
+        
     def on_attach(self):
         self.ch.setDataInterval(500)
         self.ch.setVoltageChangeTrigger(0.01)
@@ -47,7 +44,7 @@ class WindDirectionDevice(Device):
         self.v_d_tuples_raw = sorted(
             self.v_d_tuples_raw, key=lambda v_d_map: v_d_map[0])
 
-        previous_range_end = 0
+        previous_range_end = 0.0
         for idx, v_d_tuple in enumerate(self.v_d_tuples_raw):
             mid_point = v_d_tuple[0]
             direction = v_d_tuple[1]
@@ -57,14 +54,13 @@ class WindDirectionDevice(Device):
                 next_midpoint = self.v_d_tuples_raw[idx + 1][0]
             margin = abs((next_midpoint - mid_point)/2)
             range_start = previous_range_end
-            range_end = self.__to_internal_v(mid_point + margin)
+            range_end = mid_point + margin
             previous_range_end = range_end
-            v_range = range(range_start, range_end)
+            v_range = (range_start, range_end)
             self.v_d_tuples.append((v_range, direction))
 
     def find_direction(self, voltage):
-        v = self.__to_internal_v(voltage)
         for v_range, direction in self.v_d_tuples:
-            if v in v_range:
+            if v_range[0] < voltage <= v_range[1]:
                 return direction
         return None
