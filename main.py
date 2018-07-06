@@ -26,6 +26,8 @@ from Wind_Speed import WindSpeedDevice
 
 logging.basicConfig(level=logging.INFO)
 
+WS_PORT = 8000
+
 HUB_0 = 529516
 HUB_1 = 529517
 GPS_SERIAL_NUM = 285225
@@ -112,7 +114,7 @@ def main():
 
     ws_server_thread = threading.Thread(
         target=start_ws_server,
-        args=(ws_clients,)
+        args=(ws_clients, WS_PORT,)
     )
     ws_server_thread.daemon = True
     ws_server_thread.start()
