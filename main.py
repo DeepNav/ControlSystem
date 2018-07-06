@@ -4,7 +4,6 @@ import os
 import platform
 import logging
 import threading
-import json
 
 from numpy import interp
 
@@ -16,7 +15,7 @@ from Phidget22.Devices.FrequencyCounter import *
 
 from Device_Manager import Device_Manager, Device
 from Joystick import Joystick
-from ws_server import start_ws_server
+from WsServer import WsServer
 from Spatial import SpatialDevice
 from Wind_Direction import WindDirectionDevice
 from Water_Speed import WaterSpeedDevice
@@ -53,7 +52,7 @@ WATER_SPEED_LEFT_PORT = 2
 WATER_SPEED_RIGHT_PORT = 3
 
 
-def setup():
+def hardware_setup():
     dm = Device_Manager()
     js = Joystick()
 
@@ -86,19 +85,22 @@ def setup():
     return dm, js
 
 
+def start_ws():
+    ws_server = WsServer(WS_PORT)
+    ws_server_thread = threading.Thread(
+        target=ws_server.start_server,
+        args=()
+    )
+    ws_server_thread.daemon = True
+    ws_server_thread.start()
+    return ws_server
+
+
 def fetch_ai_command():
     return {
         "throttle": 0.2,
         "direction": 30
     }
-
-
-def broadcast_message(msg, clients):
-    for client in clients:
-        msg.update({
-            "ts": time.time()
-        })
-        client.sendMessage(unicode(json.dumps(msg)))
 
 
 def main():
@@ -108,16 +110,9 @@ def main():
         "is_cruise_mode": False,
     }
 
-    dm, js = setup()
+    dm, js = hardware_setup()
 
-    ws_clients = []
-
-    ws_server_thread = threading.Thread(
-        target=start_ws_server,
-        args=(ws_clients, WS_PORT,)
-    )
-    ws_server_thread.daemon = True
-    ws_server_thread.start()
+    ws_server = start_ws()
 
     logging.info("All services up and running")
 
@@ -149,14 +144,14 @@ def main():
         if time.time() - last_sync_ts > 0.5:
             # sync state every 0.5s
             state.update(dm.get_state())
-            broadcast_message(state, ws_clients)
+            ws_server.broadcast(state)
             last_sync_ts = time.time()
 
         if time.time() - last_ws_ts > 0.1:
             # push delta only every 0.1s if there is any
             event.update(dm.get_event())
             if len(event) > 0:
-                broadcast_message(event, ws_clients)
+                ws_server.broadcast(event)
                 last_ws_ts = time.time()
 
 
