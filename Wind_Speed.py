@@ -8,6 +8,7 @@ class WindSpeedDevice(Device):
         ch = FrequencyCounter()
         ch.setDeviceSerialNumber(WIND_HUB)
         ch.setHubPort(WIND_SPEED_PORT)
+        super(WindSpeedDevice, self).__init__(ch)
 
     def on_attach(self):
         device = self
