@@ -31,8 +31,8 @@ class WsServer(object):
         logging.info("ws_server started")
 
     def broadcast(self, msg):
+        msg.update({
+            "ts": time.time()
+        })
         for client in self.ws_clients:
-            msg.update({
-                "ts": time.time()
-            })
             client.sendMessage(unicode(json.dumps(msg)))
