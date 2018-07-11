@@ -8,9 +8,13 @@ In this system, we mostly uses components from [Phidgets](https://www.phidgets.c
 
 ## Core Components
 
+### Manual Controller
+
+In manual mode, we use xbox one or ps4 game controller connected via wire to control the throttle and steering, also we mapped buttons to switch between manual mode and AI mode, toggle of cruise mode and drive/revers shifter.
+
 ### Device Manager
 
-Device Manager is heart of this control system, it manages all devices and mediates states and events from different devices.
+Device Manager is the heart of this control system, it manages all devices and mediates states and events from different devices.
 
 ### WsServer
 
@@ -42,18 +46,18 @@ We use [Spatial Phidget](https://www.phidgets.com/?tier=3&catid=10&pcid=8&prodid
 
 #### Water speed
 
-Driving a boat is different from driving a car, because road doesn't move, but water does all the time. We can measure the effectiveness of proposing from GPS data, but we have no idea how fast the propeller is pushing the boat forward. That's where we need to have a water flow meter to see how fast we are traveling relative to the water flow under the boat.
+Driving a boat is different from driving a car, because the road doesn't move, but water does all the time. We can measure the effectiveness of proposing from GPS data, but we have no idea how fast the propeller is pushing the boat forward. That's where we need to have a water flow meter to see how fast we are traveling relative to the water flow under the boat.
 
 We use [water flow sensor](https://www.robotshop.com/en/seeedstudio-water-flow-sensor.html) to hook to the [Versatile Input Phidget](https://www.phidgets.com/?tier=3&catid=49&pcid=42&prodid=961)'s FrequencyCounter to get speed of flow. We have 4 of such sensors to measure the water speed in 4 directions: forward, backward, left and right.
 In order to just measure the direction we desire, we mount a L shape pipe to the exit end of the sensor, so that when going other directions, no significant flow is forced to pass the sensor.
 
 #### Wind speed and direction
 
-Wind plays a important role while drive a boat, so we hooked the [Weather Meters](https://www.sparkfun.com/products/8942) to the system via 2 [Versatile Input Phidgets](https://www.phidgets.com/?tier=3&catid=49&pcid=42&prodid=961) to get the speed and direction of the wind.
+Wind plays an important role while driving a boat, so we hooked the [Weather Meters](https://www.sparkfun.com/products/8942) to the system via 2 [Versatile Input Phidgets](https://www.phidgets.com/?tier=3&catid=49&pcid=42&prodid=961) to get the speed and direction of the wind.
 
 #### Collision prevention
 
-This one is obvious, we use the weather sealed [LIDAR-Lite v3HP](https://www.sparkfun.com/products/14599) from Garmin™ to find out how close we are to anything else from us. This little pair of glasses has a range of 5cm to 40m, which is pretty neat for our case.
+This one is obvious, we use the weather sealed [LIDAR-Lite v3HP](https://www.sparkfun.com/products/14599) from Garmin™ to find out how close we are to anything else from us. This little pair of glasses have a range of 5cm to 40m, which is pretty neat for our case.
 
 #### Vision
 
