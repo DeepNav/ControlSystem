@@ -7,6 +7,26 @@ from Device_Manager import Device
 DIAMETER = 0.0127
 SECTIONAL_AREA = math.pi * math.pow(DIAMETER/2, 2)
 
+'''
+How it works
+
+We use water flow sensor 
+(https://www.robotshop.com/en/seeedstudio-water-flow-sensor.html) to hook to the
+Versatile Input Phidget's FrequencyCounter to get speed of flow.
+We have 4 of such sensors to measure the water speed in 4 directions: forward, 
+backward, left and right.
+In order to just measure the direction we desire, we mount a L shape pipe to the
+exit end of the seasor, so that when going other directions, no significant 
+flow is forced to pass the sensor.
+
+The Math
+
+As documented, f = Q*7.5, Q is the flowspeed in L/min, thus Q = f/7.5 which means
+the volume of water pass the meter in one min. devide it by area of the sectional
+area to get the speed of water.
+
+'''
+
 
 class WaterSpeedDevice(Device):
     def __init__(self, water_direction, hub_serial_num, port_num):
