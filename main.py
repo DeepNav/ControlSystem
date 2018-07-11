@@ -19,13 +19,14 @@ from Water_Speed import WaterSpeedDevice
 from Motor import DCMotorDevice, ServoMotorDevice
 from GPSDevice import GPSDevice
 from Wind_Speed import WindSpeedDevice
+from LidarDevice import LidarLiteDevice
 
 logging.basicConfig(level=logging.INFO)
 
 WS_PORT = 8000
 
 HUB_0 = 529516
-HUB_1 = 529517
+HUB_1 = 529470
 GPS_SERIAL_NUM = 285225
 
 DC_MOTOR_HUB = HUB_0
@@ -76,6 +77,8 @@ def hardware_setup():
         "left", WATER_SPEED_HUB, WATER_SPEED_LEFT_PORT))
     dm.add("water_speed_right", WaterSpeedDevice(
         "right", WATER_SPEED_HUB, WATER_SPEED_RIGHT_PORT))
+
+    dm.add("lidar", LidarLiteDevice())
 
     dm.waitUntilAllReady()
 

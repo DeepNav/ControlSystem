@@ -2,3 +2,4 @@ Phidget22==1.0.0
 numpy
 pygame
 git+https://github.com/dpallot/simple-websocket-server.git
+pyserial

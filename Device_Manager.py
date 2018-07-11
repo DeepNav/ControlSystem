@@ -87,15 +87,13 @@ class Device_Manager(object):
 
         def onError(self, errorCode, errorString):
             dm.__device_error(device, errorCode, errorString)
-        # check if device a phdget device
-        if isinstance(device.ch, Phidget):
-            self.device_repo[device.device_id] = device
-            device.ch.setOnAttachHandler(onAttached)
-            device.ch.setOnDetachHandler(onDetached)
-            device.ch.setOnErrorHandler(onError)
-            device.ch.open()
-        else:
-            pass
+            
+        self.device_repo[device.device_id] = device
+        device.ch.setOnAttachHandler(onAttached)
+        device.ch.setOnDetachHandler(onDetached)
+        device.ch.setOnErrorHandler(onError)
+        device.ch.open()
+        
 
     def waitUntilAllReady(self):
         logging.info("Start to wait for all devices to become ready")
