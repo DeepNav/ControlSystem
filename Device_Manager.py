@@ -3,6 +3,45 @@ import logging
 
 from Phidget22.Phidget import Phidget
 
+'''
+
+Why this abstraction exists
+
+Since we are adding lots of devices into this platform, differet kinds of them,
+there are procedures that are common to every and every kind of devices.
+We don't like dupulicated code.
+Also, we need to have a centralized place to manage the state of the platform,
+these are the reasons we have Device and Device_Manager.
+
+Procedures managed
+
+when device is/has:
+    attached
+    detached
+    error
+    some event happened
+    values pass from/to each other
+
+What is ch
+
+ch stands for channel, which is a Phidget terminology, you can think it as lower
+level of device control. Our platform is trying not to expose it (not yet) as 
+much as possible.
+
+Event v.s. State
+
+Event represent something just happend, which is saying something just changed 
+to a new value, I.E. {"direction": 31.22}. Event is the atomic element to 
+represent the system's delta. Event is collected periodically by system, which 
+means whole system is not driven by event, it's driven by system's tick-tock, 
+so that the system is not overwhelmed by the flood of events from number of 
+devices. When a event is collected, old event object is discarded, a new event 
+object is created for the next cycle.
+
+Meanwhile, State is an overview, system/device collects events and merge them to 
+system/device's state
+
+'''
 
 class Device(object):
     def __init__(self, ch):
@@ -87,7 +126,7 @@ class Device_Manager(object):
 
         def onError(self, errorCode, errorString):
             dm.__device_error(device, errorCode, errorString)
-            
+
         self.device_repo[device.device_id] = device
         device.ch.setOnAttachHandler(onAttached)
         device.ch.setOnDetachHandler(onDetached)
