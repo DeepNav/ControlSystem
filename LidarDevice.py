@@ -3,6 +3,9 @@ import logging
 from lidar_lite.LidarLite import LidarLite
 from Device_Manager import Device
 
+'''
+See lidar_lite/LidarLite.py for more info
+'''
 
 class LidarLiteDevice(Device):
     def __init__(self):
