@@ -24,7 +24,8 @@ class LidarLite(object):
             if new_val != self.val:
                 old_val = self.val
                 self.val = new_val
-                self.onDistanceChange(new_val, old_val)
+                if self.onDistanceChange is not None:
+                    self.onDistanceChange(new_val, old_val)
 
     def setOnDistanceChangeHandler(self, fn):
         self.onDistanceChange = fn
