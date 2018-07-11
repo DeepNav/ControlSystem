@@ -4,6 +4,10 @@ import logging
 from Phidget22.Devices.Spatial import *
 from Device_Manager import Device
 
+'''
+see https://github.com/Cloverseer/Python_Phidget_Compass for compass_bearing
+calculation
+'''
 
 class SpatialDevice(Device):
     def __init__(self):
