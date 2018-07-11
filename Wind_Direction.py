@@ -3,9 +3,40 @@ import logging
 from Phidget22.Devices.VoltageInput import *
 from Device_Manager import Device
 
+'''
+How it works
+
+We uses the weather Meter (https://www.sparkfun.com/products/8942) to collect
+wind speed and direction data.
+For wind direction, it's basicly a variable resistor. we connect it to pull-up
+and check the voltage of it by Versatile Input Phidget 
+(https://www.phidgets.com/?tier=3&catid=49&pcid=42&prodid=961) to detect 
+direction of the wind.
+
+Wiring Guide:
+
+See https://cdn.sparkfun.com/assets/8/4/c/d/6/Weather_Sensor_Assembly_Updated.pdf
+for the Wind Vane section.
+
+Please Note:
+
+1. The voltage-direction table from above link are idea case values, it varies
+from different pull-up voltages and even different temperatures.
+To tolerant these variations, we take the voltages as mid point value, and
+and extend the valid range to the middle of next mid point, that's what the
+init_voltage_range_map method in this class doing.
+
+2. The direction we get is relative to the boat's heading direction, we need to 
+compensat it with current boat's heading direction to get the true wind 
+direction
+
+'''
+
 
 class WindDirectionDevice(Device):
     def __init__(self, HUB_SERIAL_NUM, PORT_NUM):
+
+        # voltage to direction mapping when connect to a 10k 5v pull up
         self.v_d_tuples_raw = [
             (3.84, 0.0),
             (1.98, 22.5),
