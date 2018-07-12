@@ -10,15 +10,15 @@ from Phidget22.Devices.GPS import *
 from Phidget22.PhidgetException import *
 from Phidget22.Devices.FrequencyCounter import *
 
-from Device_Manager import Device_Manager, Device
+from DeviceManager import DeviceManager, Device
 from Joystick import Joystick
 from WsServer import WsServer
 from Spatial import SpatialDevice
-from Wind_Direction import WindDirectionDevice
-from Water_Speed import WaterSpeedDevice
+from WindDirection import WindDirectionDevice
+from WaterSpeed import WaterSpeedDevice
 from Motor import DCMotorDevice, ServoMotorDevice
 from GPSDevice import GPSDevice
-from Wind_Speed import WindSpeedDevice
+from WindSpeed import WindSpeedDevice
 from LidarDevice import LidarLiteDevice
 
 logging.basicConfig(level=logging.INFO)
@@ -51,7 +51,7 @@ WATER_SPEED_RIGHT_PORT = 3
 
 
 def hardware_setup():
-    dm = Device_Manager()
+    dm = DeviceManager()
     js = Joystick()
 
     dm.add("dc_motor", DCMotorDevice(DC_MOTOR_HUB, DC_MOTOR_PORT))

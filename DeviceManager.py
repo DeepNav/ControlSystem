@@ -90,7 +90,7 @@ class Device(object):
             self.listen(event_name, callback_fn)
 
 
-class Device_Manager(object):
+class DeviceManager(object):
     def __init__(self):
         self.device_repo = {}
         self.event_links = {}
