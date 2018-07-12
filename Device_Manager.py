@@ -58,7 +58,8 @@ class Device(object):
 
     def get_event(self):
         e = self.event
-        self.event = {}
+        if len(e) > 0:
+            self.event = {}
         return e
 
     def get_state(self):
