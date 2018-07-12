@@ -18,6 +18,8 @@ Wiring Guide:
 See https://cdn.sparkfun.com/assets/8/4/c/d/6/Weather_Sensor_Assembly_Updated.pdf
 for the Wind Vane section.
 
+Voltage is supposed to be checked between terminal 2 and 5 in the RJ45 scoket
+
 Please Note:
 
 1. The voltage-direction table from above link are idea case values, it varies
