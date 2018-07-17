@@ -2,7 +2,7 @@ import math
 import logging
 
 from Phidget22.Devices.Spatial import *
-from Device_Manager import Device
+from DeviceManager import Device
 
 '''
 see https://github.com/Cloverseer/Python_Phidget_Compass for compass_bearing

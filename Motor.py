@@ -1,7 +1,7 @@
 from Phidget22.Devices.RCServo import *
 from Phidget22.Devices.DCMotor import *
 
-from Device_Manager import Device
+from DeviceManager import Device
 
 
 class DCMotorDevice(Device):

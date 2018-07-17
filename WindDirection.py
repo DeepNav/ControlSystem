@@ -1,7 +1,7 @@
 import logging
 
 from Phidget22.Devices.VoltageInput import *
-from Device_Manager import Device
+from DeviceManager import Device
 
 '''
 How it works

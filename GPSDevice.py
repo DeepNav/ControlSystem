@@ -2,7 +2,7 @@ import logging
 
 from Phidget22.Devices.GPS import *
 
-from Device_Manager import Device
+from DeviceManager import Device
 
 
 class GPSDevice(Device):

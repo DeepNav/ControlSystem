@@ -1,6 +1,6 @@
 from Phidget22.Devices.FrequencyCounter import *
 
-from Device_Manager import Device
+from DeviceManager import Device
 
 
 class WindSpeedDevice(Device):

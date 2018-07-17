@@ -2,7 +2,7 @@ import logging
 import math
 
 from Phidget22.Devices.FrequencyCounter import *
-from Device_Manager import Device
+from DeviceManager import Device
 
 DIAMETER = 0.0127
 SECTIONAL_AREA = math.pi * math.pow(DIAMETER/2, 2)

@@ -1,7 +1,7 @@
 import logging
 
 from lidar_lite.LidarLite import LidarLite
-from Device_Manager import Device
+from DeviceManager import Device
 
 '''
 See lidar_lite/LidarLite.py for more info
