@@ -1,6 +1,8 @@
 import time
+import datetime
 import logging
 import threading
+import os
 
 from numpy import interp
 
@@ -20,6 +22,8 @@ from Motor import DCMotorDevice, ServoMotorDevice
 from GPSDevice import GPSDevice
 from WindSpeed import WindSpeedDevice
 from LidarDevice import LidarLiteDevice
+from DataLogger import DataLogger
+from Cam import Cam
 
 logging.basicConfig(level=logging.INFO)
 
@@ -49,10 +53,15 @@ WATER_SPEED_BACKWARD_PORT = 1
 WATER_SPEED_LEFT_PORT = 2
 WATER_SPEED_RIGHT_PORT = 3
 
+CAM_DEVICE_INDEX = 1
+
+LOG_PATH = os.getcwd() + "/logs" + "/" + datetime.datetime.now().strftime("%y_%m_%d_%H_%M")
+
 
 def hardware_setup():
     dm = DeviceManager()
     js = Joystick()
+    cam = Cam(CAM_DEVICE_INDEX, LOG_PATH + "/images")
 
     dm.add("dc_motor", DCMotorDevice(DC_MOTOR_HUB, DC_MOTOR_PORT))
     dm.link("dc_motor", "setTargetVelocity", "throttle")
@@ -82,7 +91,7 @@ def hardware_setup():
 
     dm.waitUntilAllReady()
 
-    return dm, js
+    return dm, js, cam
 
 
 def start_ws():
@@ -110,9 +119,11 @@ def main():
         "is_cruise_mode": False,
     }
 
-    dm, js = hardware_setup()
+    dm, js, cam = hardware_setup()
 
     ws_server = start_ws()
+
+    dl = DataLogger(LOG_PATH + "/data.csv" )
 
     logging.info("All services up and running")
 
@@ -140,19 +151,28 @@ def main():
         if state["should_exit"]:
             continue
 
+        ts = time.time()
+
         # broadcast state/event to client
-        if time.time() - last_sync_ts > 0.5:
+        if ts - last_sync_ts > 0.5:
             # sync state every 0.5s
             state.update(dm.get_state())
             ws_server.broadcast(state)
             last_sync_ts = time.time()
 
-        if time.time() - last_ws_ts > 0.1:
+        if ts - last_ws_ts > 0.1:
             # push delta only every 0.1s if there is any
             event.update(dm.get_event())
             if len(event) > 0:
                 ws_server.broadcast(event)
                 last_ws_ts = time.time()
+        
+        #logging
+        state.update({
+            "timestamp": ts
+        })
+        cam.capture_and_mark(ts)
+        dl.write(state)
 
 
 main()
