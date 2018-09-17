@@ -9,6 +9,7 @@ class DataLogger(object):
         self.log_file = open(file_name, "a+")
         self.column_names = [
             "timestamp",
+            "image_file_name",
             "lat",
             "lng",
             "alt",

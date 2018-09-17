@@ -168,10 +168,12 @@ def main():
                 last_ws_ts = time.time()
         
         #logging
+        image_file_name = ('%.6f' % ts) + ".jpg"
         state.update({
-            "timestamp": ts
+            "timestamp": ts,
+            "image_file_name": image_file_name
         })
-        cam.capture_and_mark(ts)
+        cam.capture_and_mark(image_file_name)
         dl.write(state)
 
 
