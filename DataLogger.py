@@ -1,12 +1,13 @@
 import csv
 import os
+import errno
 
 class DataLogger(object):
     def __init__(self, file_name="default.csv"):
         self.unflushed_write_count = 0
         self.file_name = file_name
         self.spliter = "\n"
-        self.log_file = open(file_name, "a+")
+        self.log_file = self.create_log_file(file_name)
         self.column_names = [
             "timestamp",
             "image_file_name",
@@ -38,6 +39,8 @@ class DataLogger(object):
             "is_cruise_mode",
             "direction",
             "throttle",
+            "should_exit",
+            "ts",
             ]
         self.writer = csv.DictWriter(self.log_file, self.column_names)
         self.writer.writeheader()
@@ -51,3 +54,12 @@ class DataLogger(object):
     
     def __del__(self):
         self.log_file.close()
+
+    def create_log_file(self, file_path):
+        if not os.path.exists(os.path.dirname(file_path)):
+            try:
+                os.makedirs(os.path.dirname(file_path))
+            except OSError as exc: # Guard against race condition
+                if exc.errno != errno.EEXIST:
+                    raise
+        return open(file_path, "a+")
