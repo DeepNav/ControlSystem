@@ -24,7 +24,7 @@ Wiring Guide
 
 Mostly followed https://learn.sparkfun.com/tutorials/lidar-lite-v3-hookup-guide, 
 but we skipped getting 5v from Arduino, but from our powerful 5VDC source 
-instead, and we do not need the 1000μF capacitor either. the wiring is as:
+instead, and we do not need the 1000uF capacitor either. the wiring is as:
 
 Lidar Wire        To
 Red               Power source 5V
