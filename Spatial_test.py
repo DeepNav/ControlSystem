@@ -1,13 +1,13 @@
 import time
-from WindDirection import WindDirectionDevice
+from Spatial import SpatialDevice
 from DeviceManager import DeviceManager
 
-def test_direction():
+def test_spatial():
     dm = DeviceManager()
-    dm.add("wind_direction", WindDirectionDevice(529516, 0))
+    dm.add("spatial", SpatialDevice())
     dm.waitUntilAllReady()
     while True:
         print(dm.get_event())
         time.sleep(1)
 
-test_direction()
+test_spatial()

@@ -1,13 +1,13 @@
 import time
-from WindDirection import WindDirectionDevice
+from LidarDevice import LidarLiteDevice
 from DeviceManager import DeviceManager
 
-def test_direction():
+def test_lidar():
     dm = DeviceManager()
-    dm.add("wind_direction", WindDirectionDevice(529516, 0))
+    dm.add("lidar", LidarLiteDevice())
     dm.waitUntilAllReady()
     while True:
         print(dm.get_event())
         time.sleep(1)
 
-test_direction()
+test_lidar()

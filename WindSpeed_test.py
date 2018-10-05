@@ -1,13 +1,13 @@
 import time
-from WindDirection import WindDirectionDevice
+from WindSpeed import WindSpeedDevice
 from DeviceManager import DeviceManager
 
-def test_direction():
+def test_WindSpeed():
     dm = DeviceManager()
-    dm.add("wind_direction", WindDirectionDevice(529516, 0))
+    dm.add("wind_speed", WindSpeedDevice(529516, 5))
     dm.waitUntilAllReady()
     while True:
         print(dm.get_event())
         time.sleep(1)
 
-test_direction()
+test_WindSpeed()

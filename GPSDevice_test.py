@@ -1,13 +1,13 @@
 import time
-from WindDirection import WindDirectionDevice
+from GPSDevice import GPSDevice
 from DeviceManager import DeviceManager
 
-def test_direction():
+def test_GPS():
     dm = DeviceManager()
-    dm.add("wind_direction", WindDirectionDevice(529516, 0))
+    dm.add("gps", GPSDevice(285225))
     dm.waitUntilAllReady()
     while True:
         print(dm.get_event())
         time.sleep(1)
 
-test_direction()
+test_GPS()
