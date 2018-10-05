@@ -34,24 +34,24 @@ HUB_1 = 529470
 GPS_SERIAL_NUM = 285225
 
 DC_MOTOR_HUB = HUB_0
-DC_MOTOR_PORT = 0
+DC_MOTOR_PORT = 1
 
 SERVO_HUB = HUB_0
-SERVO_PORT = 1
+SERVO_PORT = 3
 SERVO_CHANNEL = 0
 
 SPATIAL_HUB = HUB_0
 SPATIAL_PORT = 2
 
 WIND_HUB = HUB_0
-WIND_SPEED_PORT = 3
-WIND_DIRECTION_PORT = 4
+WIND_SPEED_PORT = 5
+WIND_DIRECTION_PORT = 0
 
 WATER_SPEED_HUB = HUB_1
-WATER_SPEED_FORWARD_PORT = 0
-WATER_SPEED_BACKWARD_PORT = 1
-WATER_SPEED_LEFT_PORT = 2
-WATER_SPEED_RIGHT_PORT = 3
+WATER_SPEED_FORWARD_PORT = 1
+WATER_SPEED_BACKWARD_PORT = 2
+WATER_SPEED_LEFT_PORT = 3
+WATER_SPEED_RIGHT_PORT = 4
 
 CAM_DEVICE_INDEX = 1
 
@@ -61,7 +61,7 @@ LOG_PATH = os.getcwd() + "/logs" + "/" + datetime.datetime.now().strftime("%y_%m
 def hardware_setup():
     dm = DeviceManager()
     js = Joystick()
-    cam = Cam(CAM_DEVICE_INDEX, LOG_PATH + "/images")
+    cam = Cam(CAM_DEVICE_INDEX, LOG_PATH + "/images/")
 
     dm.add("dc_motor", DCMotorDevice(DC_MOTOR_HUB, DC_MOTOR_PORT))
     dm.link("dc_motor", "setTargetVelocity", "throttle")
@@ -69,7 +69,7 @@ def hardware_setup():
     dm.add("servo", ServoMotorDevice(SERVO_HUB, SERVO_PORT, SERVO_CHANNEL))
     dm.link("servo", "setTargetPosition", "direction",
             lambda val: interp(val, [0, 180], [45, 135]))
-
+    
     dm.add("gps", GPSDevice(GPS_SERIAL_NUM))
 
     dm.add("wind_speed", WindSpeedDevice(WIND_HUB, WIND_SPEED_PORT))
@@ -77,7 +77,7 @@ def hardware_setup():
         WIND_HUB, WIND_DIRECTION_PORT))
 
     dm.add("spatial", SpatialDevice())
-
+    
     dm.add("water_speed_forward", WaterSpeedDevice(
         "forward", WATER_SPEED_HUB, WATER_SPEED_FORWARD_PORT))
     dm.add("water_speed_backward", WaterSpeedDevice(
@@ -88,7 +88,7 @@ def hardware_setup():
         "right", WATER_SPEED_HUB, WATER_SPEED_RIGHT_PORT))
 
     dm.add("lidar", LidarLiteDevice())
-
+    
     dm.waitUntilAllReady()
 
     return dm, js, cam
